@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { addDays, format } from "date-fns"
 import { DateRange } from "react-day-picker"
 import { useCallback, useState } from "react"
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Calendar } from "@/components/ui/calendar"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -40,17 +42,15 @@ type FormData = {
   endDate: Date;
   date: Date;
   description: string;
-  single: boolean;
   type: string;
 };
 
 const FormSchema: ZodType<FormData> = z.object({
   date: z.date({
-    required_error: "A date of birth is required.",
+    required_error: "Off date is required.",
   }),
   description: z.string(),
   type: z.string(),
-  single: z.boolean(),
   startDate: z.coerce.date().refine((data) => data > new Date(), { message: "Start date must be in the future" }),
   endDate: z.coerce.date(),
 }).refine((data) => data.endDate > data.startDate, {
@@ -61,8 +61,8 @@ const FormSchema: ZodType<FormData> = z.object({
 export function CalendarForm() {
   const [isSingleDay, setIsSingleDay] = useState(false)
   const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(2022, 0, 20),
-    to: addDays(new Date(2022, 0, 20), 20),
+    from: new Date(),
+    to: addDays(new Date(), 20),
   })
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -80,9 +80,16 @@ export function CalendarForm() {
   }, [isSingleDay])
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-background">
+    <div className="flex justify-center items-center h-screen relative p-5 bg-[#296366] overflow-hidden">
+      <Image
+        src={"/background.jpg"}
+        alt="background image"
+        width={9999}
+        height={9999}
+        className=" w-full h-full object-cover rounded-3xl"
+      />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 max-w-[360px] p-[30px] bg-white rounded-lg h-fit w-full absolute inset-0 m-auto">
           <FormField
             control={form.control}
             name="type"
@@ -104,22 +111,13 @@ export function CalendarForm() {
               </div>
             )}
           />
-          <FormField
-            control={form.control}
-            name="single"
-            render={() => (
-              <FormItem className="flex items-center justify-between">
-                <FormLabel>Single Day</FormLabel>
-                <FormControl>
-                  <Switch
-                    id="singleDay"
-                    checked={isSingleDay}
-                    onCheckedChange={handleSingleChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          <div className="flex items-center justify-between">
+            <Label>Single Day</Label>
+            <Switch
+              id="singleDay"
+              onCheckedChange={handleSingleChange}
+            />
+          </div>
           {isSingleDay ?
             <FormField
               control={form.control}
@@ -156,9 +154,6 @@ export function CalendarForm() {
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormDescription>
-                    Your date of birth is used to calculate your age.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -206,9 +201,6 @@ export function CalendarForm() {
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormDescription>
-                    Your date of birth is used to calculate your age.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
