@@ -8,23 +8,25 @@ const apiClient = process.env.DIRECTUS_API_KEY
 
 const offDays: any = "Employee_Days_Off";
 
-export async function createOffDays(
-  user: number,
-  single: false,
-  startDate: string,
-  endDate: string,
-  notes: string | null,
-  type: string,
-) {
+type creationPayload = {
+  user: number;
+  single: boolean;
+  startDate: string | null;
+  endDate: string | null;
+  notes: string | null;
+  type: string;
+};
+
+export async function createOffDays(payload: creationPayload) {
   try {
     const data = await apiClient?.request(
       createItem(offDays, {
-        Employee: user,
-        Single_Day: single,
-        Start_Day: startDate,
-        End_Date: endDate,
-        Notes: notes,
-        Day_Off_Type: type,
+        Employee: payload.user,
+        Single_Day: payload.single,
+        Start_Day: payload.startDate,
+        End_Date: payload.endDate,
+        Notes: payload.notes,
+        Day_Off_Type: payload.type,
       }),
     );
 

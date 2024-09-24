@@ -1,6 +1,25 @@
 "use server";
 import { z } from "zod";
 
+import { createOffDays } from "@/libs/directus";
+
+type ParsedDataType = {
+  offType: string;
+  offDate: string | null;
+  endOff: string | null;
+  startOff: string | null;
+  note: string | null;
+};
+
+type creationPayload = {
+  user: number;
+  single: boolean;
+  startDate: string | null;
+  endDate: string | null;
+  notes: string | null;
+  type: string;
+};
+
 export async function newDayOff(
   prevState: {
     message: string;
@@ -12,7 +31,7 @@ export async function newDayOff(
     offDate: z.string().nullable(),
     endOff: z.string().nullable(),
     startOff: z.string().nullable(),
-    note: z.string(),
+    note: z.string().nullable(),
   });
 
   const parse = schema.safeParse({
@@ -23,27 +42,35 @@ export async function newDayOff(
     note: formData.get("note"),
   });
 
-  console.log(parse.error);
-  
-
   if (!parse.success) {
     return { message: "Parse failed!" };
   }
 
-  const data = parse.data;
+  const data: ParsedDataType = parse.data;
+  let isSingle = false;
 
-  console.log(data);
+  if (!data.offDate) {
+    isSingle = true;
+  }
 
-  return { message: "test"};
-  
+  const actionPayload: creationPayload = {
+    user: 22,
+    single: isSingle,
+    startDate: isSingle ? data.startOff : data.offDate,
+    endDate: data.endOff ?? null,
+    notes: data.note,
+    type: data.offType,
+  };
 
-  // try {
+  try {
+    const response = await createOffDays(actionPayload);
 
-  //   console.log(data);
-    
+    if (!response) {
+      return { messsage: "Directus error" };
+    }
 
-  //   return { message: "Form successfully submitted" };
-  // } catch (error) {
-  //   return { message: "Internal error:" + error };
-  // }
+    return { message: "Off day added successfully!" };
+  } catch (error) {
+    return { message: "Internal error:" + error };
+  }
 }
