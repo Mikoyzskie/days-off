@@ -1,4 +1,11 @@
-import { createDirectus, staticToken, rest, createItem } from "@directus/sdk";
+import {
+  createDirectus,
+  staticToken,
+  rest,
+  createItem,
+  readItems,
+  verifyHash,
+} from "@directus/sdk";
 
 const apiClient = process.env.DIRECTUS_API_KEY
   ? createDirectus("https://data.zanda.info")
@@ -34,4 +41,30 @@ export async function createOffDays(payload: creationPayload) {
   } catch (error) {
     return `${error}`;
   }
+}
+
+const employees: any = "Employees";
+
+export async function getUser(user: string) {
+  try {
+    const data = await apiClient?.request(
+      readItems(employees, {
+        fields: ["id", "Employee_Username", "employee_pin"],
+        filter: {
+          Employee_Username: {
+            _eq: user,
+          },
+        },
+        limit: 1,
+      }),
+    );
+
+    return data;
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function verifyPin(pin: string, hash: string) {
+  return apiClient?.request(verifyHash(pin, hash));
 }

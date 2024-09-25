@@ -9,6 +9,7 @@ type ParsedDataType = {
   endOff: string | null;
   startOff: string | null;
   note: string | null;
+  user: number;
 };
 
 type creationPayload = {
@@ -19,6 +20,41 @@ type creationPayload = {
   notes: string | null;
   type: string;
 };
+
+type UserDto = {
+  id: number;
+  Employee_Username: string;
+  employee_pin: string;
+};
+
+export async function login(
+  prevState: {
+    message: string;
+  },
+  formData: FormData,
+) {
+  const schema = z.object({
+    name: z.string(),
+    password: z.string(),
+  });
+
+  const parse = schema.safeParse({
+    name: formData.get("name"),
+    password: formData.get("password"),
+  });
+
+  if (!parse.success) {
+    return { message: "Parse error", user_id: 0 };
+  }
+
+  const data = parse.data;
+
+  try {
+    return { message: "Login", user_id: 0 };
+  } catch (error) {
+    return { message: "Internal Server Error", user_id: 0 };
+  }
+}
 
 export async function newDayOff(
   prevState: {
@@ -32,6 +68,7 @@ export async function newDayOff(
     endOff: z.string().nullable(),
     startOff: z.string().nullable(),
     note: z.string().nullable(),
+    user: z.string(),
   });
 
   const parse = schema.safeParse({
@@ -40,6 +77,7 @@ export async function newDayOff(
     endOff: formData.get("endOff"),
     startOff: formData.get("startOff"),
     note: formData.get("note"),
+    user: formData.get("user"),
   });
 
   if (!parse.success) {
@@ -63,11 +101,7 @@ export async function newDayOff(
   };
 
   try {
-    const response = await createOffDays(actionPayload);
-
-    if (!response) {
-      return { messsage: "Directus error" };
-    }
+    await createOffDays(actionPayload);
 
     return { message: "Off day added successfully!" };
   } catch (error) {
