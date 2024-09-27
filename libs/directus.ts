@@ -45,7 +45,7 @@ export async function createOffDays(payload: creationPayload) {
 
 const employees: any = "Employees";
 
-export async function getUser(user: string) {
+export async function getUser(user: string): Promise<string> {
   try {
     const data = await apiClient?.request(
       readItems(employees, {
@@ -59,9 +59,9 @@ export async function getUser(user: string) {
       }),
     );
 
-    return data;
+    return JSON.stringify(data);
   } catch (error) {
-    return error;
+    return `Server error: ${error}`;
   }
 }
 

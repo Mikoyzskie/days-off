@@ -4,7 +4,7 @@ import { Select, SelectItem } from "@nextui-org/select";
 import { Switch } from "@nextui-org/switch";
 import { DatePicker, DateRangePicker } from "@nextui-org/date-picker";
 import { Textarea, Input } from "@nextui-org/input";
-import { Button, Link } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { getLocalTimeZone, today } from "@internationalized/date";
@@ -160,9 +160,9 @@ export default function PricingPage() {
             label="Password"
             name="password"
             placeholder="Enter your clock in pin"
+            type="password"
           />
-          <Button>Submit</Button>
-          <Link>Reset</Link>
+          <SubmitButton />
         </form>
       )}
     </div>

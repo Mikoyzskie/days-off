@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 
-import { createOffDays } from "@/libs/directus";
+import { createOffDays, getUser, verifyPin } from "@/libs/directus";
 
 type ParsedDataType = {
   offType: string;
@@ -9,7 +9,7 @@ type ParsedDataType = {
   endOff: string | null;
   startOff: string | null;
   note: string | null;
-  user: number;
+  user: string;
 };
 
 type creationPayload = {
@@ -39,7 +39,7 @@ export async function login(
   });
 
   const parse = schema.safeParse({
-    name: formData.get("name"),
+    name: formData.get("username"),
     password: formData.get("password"),
   });
 
@@ -50,7 +50,23 @@ export async function login(
   const data = parse.data;
 
   try {
-    return { message: "Login", user_id: 0 };
+    const user = await getUser(data.name);
+    const userData: UserDto[] = JSON.parse(user);
+
+    if (userData.length === 0) {
+      return { message: "User not found", user_id: 0 };
+    }
+
+    const isPasswordValid = await verifyPin(
+      data.password,
+      userData[0].employee_pin,
+    );
+
+    if (!isPasswordValid) {
+      return { message: "Invalid Password", user_id: 0 };
+    }
+
+    return { message: "Login", user_id: userData[0].id };
   } catch (error) {
     return { message: "Internal Server Error", user_id: 0 };
   }
