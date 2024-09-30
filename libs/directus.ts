@@ -4,6 +4,7 @@ import {
   rest,
   createItem,
   readItems,
+  readItem,
   verifyHash,
 } from "@directus/sdk";
 
@@ -62,6 +63,20 @@ export async function getUser(user: string): Promise<string> {
     return JSON.stringify(data);
   } catch (error) {
     return `Server error: ${error}`;
+  }
+}
+
+export async function readUser(user: number): Promise<string> {
+  try {
+    const data = await apiClient?.request(
+      readItem(employees, user, {
+        fields: ["id", "Employee_Username", "employee_pin"],
+      }),
+    );
+
+    return JSON.stringify(data);
+  } catch (error) {
+    return JSON.stringify(error);
   }
 }
 

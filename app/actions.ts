@@ -1,7 +1,9 @@
 "use server";
 import { z } from "zod";
 
-import { createOffDays, getUser, verifyPin } from "@/libs/directus";
+import { ERROR_MESSAGE } from "./libs/enums/enums";
+
+import { createOffDays, getUser, verifyPin, readUser } from "@/libs/directus";
 
 type ParsedDataType = {
   offType: string;
@@ -44,7 +46,7 @@ export async function login(
   });
 
   if (!parse.success) {
-    return { message: "Parse error", user_id: 0 };
+    return { message: ERROR_MESSAGE.PARSE_ERROR, user_id: 0 };
   }
 
   const data = parse.data;
@@ -54,7 +56,7 @@ export async function login(
     const userData: UserDto[] = JSON.parse(user);
 
     if (userData.length === 0) {
-      return { message: "User not found", user_id: 0 };
+      return { message: ERROR_MESSAGE.NO_USER, user_id: 0 };
     }
 
     const isPasswordValid = await verifyPin(
@@ -63,12 +65,12 @@ export async function login(
     );
 
     if (!isPasswordValid) {
-      return { message: "Invalid Password", user_id: 0 };
+      return { message: ERROR_MESSAGE.BAD_PASSWORD, user_id: 0 };
     }
 
     return { message: "Login", user_id: userData[0].id };
   } catch (error) {
-    return { message: "Internal Server Error", user_id: 0 };
+    return { message: ERROR_MESSAGE.SERVER_ERROR, user_id: 0 };
   }
 }
 
@@ -97,7 +99,7 @@ export async function newDayOff(
   });
 
   if (!parse.success) {
-    return { message: "Parse failed!" };
+    return { message: ERROR_MESSAGE.PARSE_ERROR };
   }
 
   const data: ParsedDataType = parse.data;
@@ -108,7 +110,7 @@ export async function newDayOff(
   }
 
   const actionPayload: creationPayload = {
-    user: 22,
+    user: 999,
     single: isSingle,
     startDate: isSingle ? data.startOff : data.offDate,
     endDate: data.endOff ?? null,
@@ -117,10 +119,17 @@ export async function newDayOff(
   };
 
   try {
+    const currentUser = await readUser(Number(data.user));
+    const readUserData = JSON.parse(currentUser);
+
+    if (readUserData.errors) {
+      return { message: ERROR_MESSAGE.NO_USER };
+    }
+
     await createOffDays(actionPayload);
 
     return { message: "Off day added successfully!" };
   } catch (error) {
-    return { message: "Internal error:" + error };
+    return { message: ERROR_MESSAGE.SERVER_ERROR };
   }
 }
