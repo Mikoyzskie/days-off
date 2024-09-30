@@ -74,9 +74,19 @@ export default function Home() {
       );
 
       setIsError(isMessagePresent);
+      if (leaveState.message === "Off day added successfully!") {
+        formRef.current?.reset();
+      }
+
       setMessage(leaveState.message);
     }
   }, [leaveState]);
+
+  useEffect(() => {
+    if (message === "Login") {
+      setMessage("");
+    }
+  }, [message]);
 
   useEffect(() => {
     if (loginState.message) {
@@ -120,6 +130,7 @@ export default function Home() {
             action={leaveFormAction}
             className="flex justify-center flex-col gap-5 max-w-[320px] w-full mx-auto"
           >
+            <h2 className="text-lg">Off Day</h2>
             <Select
               isRequired
               className="max-w-xs"
@@ -134,7 +145,7 @@ export default function Home() {
               ))}
             </Select>
             <div className="flex justify-between items-center flex-row">
-              <span className="ml-2">Single Day</span>
+              <span className="ml text-sm">Single Day</span>
               <Switch isSelected={isSingle} onValueChange={setIsSingle} />
             </div>
             {isSingle ? (
@@ -165,7 +176,10 @@ export default function Home() {
             <input name="user" type="hidden" value={currentUser} />
             <span
               className={clsx(
-                isError ? "text-center text-sm italic text-red-500" : "hidden",
+                message === ""
+                  ? "hidden"
+                  : "text-green-500 text-sm text-center",
+                isError ? "text-center text-sm italic text-red-500" : "",
               )}
             >
               {message}
@@ -180,6 +194,7 @@ export default function Home() {
             action={loginFormAction}
             className="flex justify-center flex-col gap-5 max-w-[320px] w-full mx-auto"
           >
+            <h2>Login</h2>
             <Input
               isRequired
               label="Username"

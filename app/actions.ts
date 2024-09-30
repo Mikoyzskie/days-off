@@ -110,7 +110,7 @@ export async function newDayOff(
   }
 
   const actionPayload: creationPayload = {
-    user: 999,
+    user: Number(data.user),
     single: isSingle,
     startDate: isSingle ? data.startOff : data.offDate,
     endDate: data.endOff ?? null,
