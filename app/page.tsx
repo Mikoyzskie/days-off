@@ -45,18 +45,25 @@ const initialLeaveState: InitialLeaveState = {
 };
 
 type InitialLoginState = {
-  user_id: number;
+  user_id: number | null;
+  username: string;
   message: string;
 };
 
 const initialLoginState: InitialLoginState = {
-  user_id: 0,
+  user_id: null,
+  username: "",
   message: "",
+};
+
+type CurrentUserType = {
+  id: number;
+  username: string;
 };
 
 export default function Home() {
   const [isSingle, setIsSingle] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<number>(0);
+  const [currentUser, setCurrentUser] = useState<CurrentUserType>();
   const [leaveState, leaveFormAction] = useFormState(
     newDayOff,
     initialLeaveState,
@@ -64,6 +71,7 @@ export default function Home() {
   const [loginState, loginFormAction] = useFormState(login, initialLoginState);
   const [message, setMessage] = useState<string>("");
   const [isError, setIsError] = useState<boolean>(false);
+  const [storageString, setStorageString] = useState<string | null>("");
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -102,21 +110,34 @@ export default function Home() {
 
   useEffect(() => {
     if (loginState.user_id) {
-      setCurrentUser(loginState.user_id);
-      localStorage.setItem("currentUser", loginState.user_id.toString());
+      setCurrentUser({ id: loginState.user_id, username: loginState.username });
+      const storageString = {
+        id: loginState.user_id,
+        username: loginState.username,
+      };
+
+      localStorage.setItem("currentUser", JSON.stringify(storageString));
     }
   }, [loginState]);
 
   useEffect(() => {
-    const currentUserId = localStorage.getItem("currentUser");
+    if (typeof window !== "undefined") {
+      const currentUserStorage = localStorage.getItem("currentUser");
 
-    if (currentUserId) {
-      setCurrentUser(Number(currentUserId));
+      setStorageString(currentUserStorage);
     }
   }, []);
 
+  useEffect(() => {
+    if (storageString) {
+      const storedUser: CurrentUserType = JSON.parse(storageString);
+
+      setCurrentUser({ id: storedUser.id, username: storedUser.username });
+    }
+  }, [storageString]);
+
   const handleSignout = useCallback(() => {
-    setCurrentUser(0);
+    setCurrentUser(undefined);
     setMessage("");
     localStorage.removeItem("currentUser");
   }, []);
@@ -124,13 +145,15 @@ export default function Home() {
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <div className="w-full">
-        {currentUser !== 0 ? (
+        {currentUser ? (
           <form
             ref={formRef}
             action={leaveFormAction}
             className="flex justify-center flex-col gap-5 max-w-[320px] w-full mx-auto"
           >
-            <h2 className="text-lg">Off Day</h2>
+            <h2 className="text-lg">
+              G{"'"}day {currentUser.username}
+            </h2>
             <Select
               isRequired
               className="max-w-xs"
@@ -173,7 +196,7 @@ export default function Home() {
               placeholder="Enter your description"
               variant="bordered"
             />
-            <input name="user" type="hidden" value={currentUser} />
+            <input name="user" type="hidden" value={currentUser.id} />
             <span
               className={clsx(
                 message === ""

@@ -50,7 +50,7 @@ export async function getUser(user: string): Promise<string> {
   try {
     const data = await apiClient?.request(
       readItems(employees, {
-        fields: ["id", "Employee_Username", "employee_pin"],
+        fields: ["id", "Employee_Username", "employee_pin", "First_Name"],
         filter: {
           Employee_Username: {
             _eq: user,
@@ -70,7 +70,7 @@ export async function readUser(user: number): Promise<string> {
   try {
     const data = await apiClient?.request(
       readItem(employees, user, {
-        fields: ["id", "Employee_Username", "employee_pin"],
+        fields: ["id", "Employee_Username", "employee_pin", "First_Name"],
       }),
     );
 

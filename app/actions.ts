@@ -27,6 +27,7 @@ type UserDto = {
   id: number;
   Employee_Username: string;
   employee_pin: string;
+  First_Name: string;
 };
 
 export async function login(
@@ -46,7 +47,7 @@ export async function login(
   });
 
   if (!parse.success) {
-    return { message: ERROR_MESSAGE.PARSE_ERROR, user_id: 0 };
+    return { message: ERROR_MESSAGE.PARSE_ERROR, user_id: null, username: "" };
   }
 
   const data = parse.data;
@@ -56,7 +57,7 @@ export async function login(
     const userData: UserDto[] = JSON.parse(user);
 
     if (userData.length === 0) {
-      return { message: ERROR_MESSAGE.NO_USER, user_id: 0 };
+      return { message: ERROR_MESSAGE.NO_USER, user_id: null, username: "" };
     }
 
     const isPasswordValid = await verifyPin(
@@ -65,12 +66,20 @@ export async function login(
     );
 
     if (!isPasswordValid) {
-      return { message: ERROR_MESSAGE.BAD_PASSWORD, user_id: 0 };
+      return {
+        message: ERROR_MESSAGE.BAD_PASSWORD,
+        user_id: null,
+        username: "",
+      };
     }
 
-    return { message: "Login", user_id: userData[0].id };
+    return {
+      message: "Login",
+      user_id: userData[0].id,
+      username: userData[0].First_Name,
+    };
   } catch (error) {
-    return { message: ERROR_MESSAGE.SERVER_ERROR, user_id: 0 };
+    return { message: ERROR_MESSAGE.SERVER_ERROR, user_id: null, username: "" };
   }
 }
 
