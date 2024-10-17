@@ -9,6 +9,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { getLocalTimeZone, today } from "@internationalized/date";
 import clsx from "clsx";
+import Link from "next/link";
 
 import { ERROR_MESSAGE } from "./libs/enums/enums";
 import { newDayOff, login } from "./actions";
@@ -239,6 +240,12 @@ export default function Home() {
               {message}
             </span>
             <SubmitButton />
+            <Link
+              className="text-center text-xs hover:underline"
+              href={"https://time.zanda.info/"}
+            >
+              Time In / Time Out
+            </Link>
           </form>
         )}
       </div>
